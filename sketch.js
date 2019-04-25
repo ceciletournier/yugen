@@ -3,19 +3,19 @@
 let flock;
 
 function setup() {
-    createCanvas(640, 360);
+    createCanvas(window.outerWidth, window.outerHeight);
     //createP("Drag the mouse to generate new boids.");
 
     flock = new Flock();
     // Add an initial set of boids into the system
-    for (let i = 0; i < 100; i++) {
+    for (let i = 0; i < 300; i++) {
         let b = new Boid(width / 2,height / 2);
         flock.addBoid(b);
     }
 }
 
 function draw() {
-    background(51);
+    background(0);
     flock.run();
 }
 
@@ -57,9 +57,9 @@ function Boid(x, y) {
     this.acceleration = createVector(0, 0);
     this.velocity = createVector(random(-1, 1), random(-1, 1));
     this.position = createVector(x, y);
-    this.r = 3.0;
-    this.maxspeed = 3;    // Maximum speed
-    this.maxforce = 0.05; // Maximum steering force
+    this.r = 10;             // Size
+    this.maxspeed = 1;    // Maximum speed
+    this.maxforce = 0.01; // Maximum steering force
 }
 
 Boid.prototype.run = function(boids) {
@@ -116,15 +116,18 @@ Boid.prototype.seek = function(target) {
 Boid.prototype.render = function() {
     // Draw a triangle rotated in the direction of velocity
     let theta = this.velocity.heading() + radians(90);
-    fill(127);
-    stroke(200);
+    fill(255);
+    stroke(255);
     push();
     translate(this.position.x, this.position.y);
     rotate(theta);
     beginShape();
+    ellipse(this.r, this.r, this.r, this.r)
+    /*
     vertex(0, -this.r * 2);
     vertex(-this.r, this.r * 2);
     vertex(this.r, this.r * 2);
+    */
     endShape(CLOSE);
     pop();
 }
