@@ -57,7 +57,7 @@ function Boid(x, y) {
     this.acceleration = createVector(0, 0);
     this.velocity = createVector(random(-1, 1), random(-1, 1));
     this.position = createVector(x, y);
-    this.r = 10;             // Size
+    this.r = 30;             // Size
     this.maxspeed = 5;    // Maximum speed
     this.maxforce = 0.07; // Maximum steering force
 }
