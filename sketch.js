@@ -58,8 +58,8 @@ function Boid(x, y) {
     this.velocity = createVector(random(-1, 1), random(-1, 1));
     this.position = createVector(x, y);
     this.r = 10;             // Size
-    this.maxspeed = 3;    // Maximum speed
-    this.maxforce = 0.01; // Maximum steering force
+    this.maxspeed = 5;    // Maximum speed
+    this.maxforce = 0.07; // Maximum steering force
 }
 
 Boid.prototype.run = function(boids) {
