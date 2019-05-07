@@ -2,9 +2,9 @@ let flock;
 
 let mic;
 
-let initialBoid = 10;
-let immortalBoid = 1;
-let maximumBoid = 13;
+let initialBoid = 100;
+let immortalBoid = 15;
+let maximumBoid = 300;
 
 let micSensitivityTrigger = 0.01;
 
@@ -41,7 +41,6 @@ function setup() {
 function draw() {
     background(0);
     flock.run();
-    //console.log(mic.getLevel());
     if (mic.getLevel() > micSensitivityTrigger) {
         flock.addBoid(new Boid(width / 2, height / 2));
     }
