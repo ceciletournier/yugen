@@ -1,32 +1,59 @@
-
-
 let flock;
+
+let mic;
+
+let initialBoid = 10;
+let immortalBoid = 1;
+let maximumBoid = 13;
+
+let micSensitivityTrigger = 0.01;
+
+let boidsCanDie = true;
+
+let clickGenerateBoids = true;
+
+let img;
+
+function preload() {
+    img = loadImage('butterfly.png');
+}
 
 function setup() {
     createCanvas(window.outerWidth, window.outerHeight);
-    //createP("Drag the mouse to generate new boids.");
 
     flock = new Flock();
     // Add an initial set of boids into the system
-    for (let i = 0; i < 300; i++) {
-        let b = new Boid(width / 2,height / 2);
+    for (let i = 0; i < initialBoid; i++) {
+        let b = new Boid(width / 2, height / 2);
         flock.addBoid(b);
     }
+    for (let i = 0; i < immortalBoid; i++) {
+        let b = new Boid(width / 2, height / 2, true);
+        flock.addBoid(b);
+    }
+
+
+    mic = new p5.AudioIn();
+    mic.start();
+
 }
 
 function draw() {
     background(0);
     flock.run();
+    //console.log(mic.getLevel());
+    if (mic.getLevel() > micSensitivityTrigger) {
+        flock.addBoid(new Boid(width / 2, height / 2));
+    }
 }
 
 // Add a new boid into the System
 function mouseDragged() {
-    flock.addBoid(new Boid(mouseX, mouseY));
+    if (clickGenerateBoids) {
+        flock.addBoid(new Boid(mouseX, mouseY));
+    }
 }
 
-// The Nature of Code
-// Daniel Shiffman
-// http://natureofcode.com
 
 // Flock object
 // Does very little, simply manages the array of all the boids
@@ -36,15 +63,23 @@ function Flock() {
     this.boids = []; // Initialize the array
 }
 
-Flock.prototype.run = function() {
+Flock.prototype.run = function () {
     for (let i = 0; i < this.boids.length; i++) {
         this.boids[i].run(this.boids);  // Passing the entire list of boids to each boid individually
     }
-}
-
-Flock.prototype.addBoid = function(b) {
+    if (boidsCanDie) {
+        let now = new Date();
+        this.boids = this.boids.filter(boid => !boid.deathDate || boid.deathDate > now);
+    }
+};
+let indexToKill;
+Flock.prototype.addBoid = function (b) {
+    if (this.boids && this.boids.length > maximumBoid) {
+        indexToKill = this.boids.findIndex(boid => boid.deathDate);
+        this.boids = this.boids.filter((b, i) => i !== indexToKill);
+    }
     this.boids.push(b);
-}
+};
 
 // The Nature of Code
 // Daniel Shiffman
@@ -53,29 +88,37 @@ Flock.prototype.addBoid = function(b) {
 // Boid class
 // Methods for Separation, Cohesion, Alignment added
 
-function Boid(x, y) {
+function Boid(x, y, immortal = false) {
     this.acceleration = createVector(0, 0);
     this.velocity = createVector(random(-1, 1), random(-1, 1));
     this.position = createVector(x, y);
-    this.r = 10;             // Size
+    this.r = 30;             // Size
     this.maxspeed = 1;    // Maximum speed
     this.maxforce = 0.01; // Maximum steering force
+    this.ttl = 60; //seconds
+    if (!immortal) {
+        this.deathDate = ((ttl) => {
+            var t = new Date();
+            t.setSeconds(t.getSeconds() + ttl);
+            return t;
+        })(this.ttl);
+    }
 }
 
-Boid.prototype.run = function(boids) {
+Boid.prototype.run = function (boids) {
     this.flock(boids);
     this.update();
     this.borders();
     this.render();
-}
+};
 
-Boid.prototype.applyForce = function(force) {
+Boid.prototype.applyForce = function (force) {
     // We could add mass here if we want A = F / M
     this.acceleration.add(force);
-}
+};
 
 // We accumulate a new acceleration each time based on three rules
-Boid.prototype.flock = function(boids) {
+Boid.prototype.flock = function (boids) {
     let sep = this.separate(boids);   // Separation
     let ali = this.align(boids);      // Alignment
     let coh = this.cohesion(boids);   // Cohesion
@@ -87,10 +130,10 @@ Boid.prototype.flock = function(boids) {
     this.applyForce(sep);
     this.applyForce(ali);
     this.applyForce(coh);
-}
+};
 
 // Method to update location
-Boid.prototype.update = function() {
+Boid.prototype.update = function () {
     // Update velocity
     this.velocity.add(this.acceleration);
     // Limit speed
@@ -98,22 +141,22 @@ Boid.prototype.update = function() {
     this.position.add(this.velocity);
     // Reset accelertion to 0 each cycle
     this.acceleration.mult(0);
-}
+};
 
 // A method that calculates and applies a steering force towards a target
 // STEER = DESIRED MINUS VELOCITY
-Boid.prototype.seek = function(target) {
-    let desired = p5.Vector.sub(target,this.position);  // A vector pointing from the location to the target
+Boid.prototype.seek = function (target) {
+    let desired = p5.Vector.sub(target, this.position);  // A vector pointing from the location to the target
     // Normalize desired and scale to maximum speed
     desired.normalize();
     desired.mult(this.maxspeed);
     // Steering = Desired minus Velocity
-    let steer = p5.Vector.sub(desired,this.velocity);
+    let steer = p5.Vector.sub(desired, this.velocity);
     steer.limit(this.maxforce);  // Limit to maximum steering force
     return steer;
-}
+};
 
-Boid.prototype.render = function() {
+Boid.prototype.render = function () {
     // Draw a triangle rotated in the direction of velocity
     let theta = this.velocity.heading() + radians(90);
     fill(255);
@@ -121,34 +164,30 @@ Boid.prototype.render = function() {
     push();
     translate(this.position.x, this.position.y);
     rotate(theta);
-    beginShape();
-    ellipse(this.r, this.r, this.r, this.r)
-    /*
-    vertex(0, -this.r * 2);
-    vertex(-this.r, this.r * 2);
-    vertex(this.r, this.r * 2);
-    */
-    endShape(CLOSE);
+    /* beginShape();
+     ellipse(this.r, this.r, this.r, this.r);
+     endShape(CLOSE);*/
+    image(img, this.r, this.r, this.r, this.r);
     pop();
-}
+};
 
 // Wraparound
-Boid.prototype.borders = function() {
-    if (this.position.x < -this.r)  this.position.x = width + this.r;
-    if (this.position.y < -this.r)  this.position.y = height + this.r;
+Boid.prototype.borders = function () {
+    if (this.position.x < -this.r) this.position.x = width + this.r;
+    if (this.position.y < -this.r) this.position.y = height + this.r;
     if (this.position.x > width + this.r) this.position.x = -this.r;
     if (this.position.y > height + this.r) this.position.y = -this.r;
-}
+};
 
 // Separation
 // Method checks for nearby boids and steers away
-Boid.prototype.separate = function(boids) {
+Boid.prototype.separate = function (boids) {
     let desiredseparation = 25.0;
     let steer = createVector(0, 0);
     let count = 0;
     // For every boid in the system, check if it's too close
     for (let i = 0; i < boids.length; i++) {
-        let d = p5.Vector.dist(this.position,boids[i].position);
+        let d = p5.Vector.dist(this.position, boids[i].position);
         // If the distance is greater than 0 and less than an arbitrary amount (0 when you are yourself)
         if ((d > 0) && (d < desiredseparation)) {
             // Calculate vector pointing away from neighbor
@@ -173,16 +212,16 @@ Boid.prototype.separate = function(boids) {
         steer.limit(this.maxforce);
     }
     return steer;
-}
+};
 
 // Alignment
 // For every nearby boid in the system, calculate the average velocity
-Boid.prototype.align = function(boids) {
+Boid.prototype.align = function (boids) {
     let neighbordist = 50;
-    let sum = createVector(0,0);
+    let sum = createVector(0, 0);
     let count = 0;
     for (let i = 0; i < boids.length; i++) {
-        let d = p5.Vector.dist(this.position,boids[i].position);
+        let d = p5.Vector.dist(this.position, boids[i].position);
         if ((d > 0) && (d < neighbordist)) {
             sum.add(boids[i].velocity);
             count++;
@@ -198,16 +237,16 @@ Boid.prototype.align = function(boids) {
     } else {
         return createVector(0, 0);
     }
-}
+};
 
 // Cohesion
 // For the average location (i.e. center) of all nearby boids, calculate steering vector towards that location
-Boid.prototype.cohesion = function(boids) {
+Boid.prototype.cohesion = function (boids) {
     let neighbordist = 50;
     let sum = createVector(0, 0);   // Start with empty vector to accumulate all locations
     let count = 0;
     for (let i = 0; i < boids.length; i++) {
-        let d = p5.Vector.dist(this.position,boids[i].position);
+        let d = p5.Vector.dist(this.position, boids[i].position);
         if ((d > 0) && (d < neighbordist)) {
             sum.add(boids[i].position); // Add location
             count++;
@@ -219,6 +258,6 @@ Boid.prototype.cohesion = function(boids) {
     } else {
         return createVector(0, 0);
     }
-}
+};
 
 
