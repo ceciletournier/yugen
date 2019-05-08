@@ -14,6 +14,14 @@ let clickGenerateBoids = true;
 
 let img;
 
+function randomX() {
+    return Math.floor(Math.random() * window.outerWidth) % window.outerWidth;
+}
+
+function randomY() {
+    return Math.floor(Math.random() * window.outerHeight) % window.outerHeight;
+}
+
 function preload() {
     img = loadImage('butterfly.png');
 }
@@ -24,7 +32,7 @@ function setup() {
     flock = new Flock();
     // Add an initial set of boids into the system
     for (let i = 0; i < initialBoid; i++) {
-        let b = new Boid(width / 2, height / 2);
+        let b = new Boid(randomX(), randomY());
         flock.addBoid(b);
     }
     for (let i = 0; i < immortalBoid; i++) {
@@ -42,7 +50,7 @@ function draw() {
     background(0);
     flock.run();
     if (mic.getLevel() > micSensitivityTrigger) {
-        flock.addBoid(new Boid(width / 2, height / 2));
+        flock.addBoid(new Boid(randomX(), randomY()));
     }
 }
 
@@ -52,7 +60,6 @@ function mouseDragged() {
         flock.addBoid(new Boid(mouseX, mouseY));
     }
 }
-
 
 // Flock object
 // Does very little, simply manages the array of all the boids
