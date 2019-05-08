@@ -2,11 +2,11 @@ let flock;
 
 let mic;
 
-let initialBoid = 100;
-let immortalBoid = 15;
-let maximumBoid = 300;
+let initialBoid = 100; // nombre de papillon au chargement de la page
+let immortalBoid = 15; // Nombre de papillon qui ne peuvent pas mourrir
+let maximumBoid = 300; // nombre de papillon qui peuvent etre affiche sur la page
 
-let micSensitivityTrigger = 0.01;
+let micSensitivityTrigger = 0.01; // sensibilite du micro (plus c'est bas plus c'est sensible)
 
 let boidsCanDie = true;
 
@@ -101,7 +101,7 @@ function Boid(x, y, immortal = false) {
     this.r = 30;             // Size
     this.maxspeed = 1;    // Maximum speed
     this.maxforce = 0.01; // Maximum steering force
-    this.ttl = 60; //seconds
+    this.ttl = 60; // duree de vie en secondes
     if (!immortal) {
         this.deathDate = ((ttl) => {
             var t = new Date();
