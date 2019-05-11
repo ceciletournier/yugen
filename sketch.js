@@ -4,13 +4,15 @@ let mic;
 
 let initialBoid = 50; // nombre de papillon au chargement de la page
 let immortalBoid = 15; // Nombre de papillon qui ne peuvent pas mourrir
-let maximumBoid = 150; // nombre de papillon qui peuvent etre affiche sur la page
+let maximumBoid = 250; // nombre de papillon qui peuvent etre affiche sur la page
 
 let micSensitivityTrigger = 0.01; // sensibilite du micro (plus c'est bas plus c'est sensible)
 
 let boidsCanDie = true;
 
 let clickGenerateBoids = true;
+
+let randomCoordinates = true;
 
 let img = [];
 
@@ -36,8 +38,11 @@ function setup() {
     flock = new Flock();
     // Add an initial set of boids into the system
     for (let i = 0; i < initialBoid; i++) {
-        let b = new Boid(randomX(), randomY());
-        flock.addBoid(b);
+        if (randomCoordinates) {
+            flock.addBoid(new Boid(randomX(), randomY()));
+        } else {
+            flock.addBoid(new Boid(width / 2, height / 2));
+        }
     }
     for (let i = 0; i < immortalBoid; i++) {
         let b = new Boid(width / 2, height / 2, true);
@@ -54,7 +59,11 @@ function draw() {
     background(0);
     flock.run();
     if (mic.getLevel() > micSensitivityTrigger) {
-        flock.addBoid(new Boid(width / 2, height / 2));
+        if (randomCoordinates) {
+            flock.addBoid(new Boid(randomX(), randomY()));
+        } else {
+            flock.addBoid(new Boid(width / 2, height / 2));
+        }
     }
 }
 
@@ -82,13 +91,11 @@ Flock.prototype.run = function () {
         this.boids = this.boids.filter(boid => !boid.deathDate || boid.deathDate > now);
     }
 };
-let indexToKill;
+
 Flock.prototype.addBoid = function (b) {
-    if (this.boids && this.boids.length > maximumBoid) {
-        indexToKill = this.boids.findIndex(boid => boid.deathDate);
-        this.boids = this.boids.filter((b, i) => i !== indexToKill);
+    if (this.boids && this.boids.length < maximumBoid) {
+        this.boids.push(b);
     }
-    this.boids.push(b);
 };
 
 // The Nature of Code
@@ -102,10 +109,10 @@ function Boid(x, y, immortal = false) {
     this.acceleration = createVector(0, 0);
     this.velocity = createVector(random(-1, 1), random(-1, 1));
     this.position = createVector(x, y);
-    this.r = 15;             // Size Radius
+    this.r = 100;             // Size Radius
     this.size = 100;             // Size Image
-    this.maxspeed = 3;    // Maximum speed
-    this.maxforce = 0.05; // Maximum steering force
+    this.maxspeed = 10;    // Maximum speed
+    this.maxforce = 0.001; // Maximum steering force
     this.ttl = 60; // duree de vie en secondes
     this.imgId = Math.floor((Math.random() * 10) % img.length);
     if (!immortal) {
@@ -132,16 +139,16 @@ Boid.prototype.applyForce = function (force) {
 // We accumulate a new acceleration each time based on three rules
 Boid.prototype.flock = function (boids) {
     let sep = this.separate(boids);   // Separation
-    let ali = this.align(boids);      // Alignment
-    let coh = this.cohesion(boids);   // Cohesion
+    //let ali = this.align(boids);      // Alignment
+    //let coh = this.cohesion(boids);   // Cohesion
     // Arbitrarily weight these forces
     sep.mult(1.5);
-    ali.mult(1.0);
-    coh.mult(1.0);
+    //ali.mult(1.0);
+    //coh.mult(1.0);
     // Add the force vectors to acceleration
     this.applyForce(sep);
-    this.applyForce(ali);
-    this.applyForce(coh);
+    //this.applyForce(ali);
+    //this.applyForce(coh);
 };
 
 // Method to update location
@@ -176,12 +183,12 @@ Boid.prototype.render = function () {
     push();
     translate(this.position.x, this.position.y);
     rotate(theta);
-    beginShape();
+    /*beginShape();
     vertex(0, -this.r * 2);
     vertex(-this.r, this.r * 2);
     vertex(this.r, this.r * 2);
-    endShape(CLOSE);
-    //image(img[this.imgId],this.size ,this.size,this.size ,this.size);
+    endShape(CLOSE);*/
+    image(img[this.imgId], this.size, this.size, this.size, this.size);
     pop();
 };
 
