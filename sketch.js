@@ -2,9 +2,9 @@ let flock;
 
 let mic;
 
-let initialBoid = 100; // nombre de papillon au chargement de la page
+let initialBoid = 50; // nombre de papillon au chargement de la page
 let immortalBoid = 15; // Nombre de papillon qui ne peuvent pas mourrir
-let maximumBoid = 300; // nombre de papillon qui peuvent etre affiche sur la page
+let maximumBoid = 150; // nombre de papillon qui peuvent etre affiche sur la page
 
 let micSensitivityTrigger = 0.01; // sensibilite du micro (plus c'est bas plus c'est sensible)
 
@@ -12,7 +12,7 @@ let boidsCanDie = true;
 
 let clickGenerateBoids = true;
 
-let img;
+let img = [];
 
 function randomX() {
     return Math.floor(Math.random() * window.outerWidth) % window.outerWidth;
@@ -23,7 +23,11 @@ function randomY() {
 }
 
 function preload() {
-    img = loadImage('butterfly.png');
+    img.push(loadImage('assets/Forme-1.png'));
+    img.push(loadImage('assets/Forme-2.png'));
+    img.push(loadImage('assets/Forme-3.png'));
+    img.push(loadImage('assets/Forme-4.png'));
+    img.push(loadImage('assets/Forme-5.png'));
 }
 
 function setup() {
@@ -50,7 +54,7 @@ function draw() {
     background(0);
     flock.run();
     if (mic.getLevel() > micSensitivityTrigger) {
-        flock.addBoid(new Boid(randomX(), randomY()));
+        flock.addBoid(new Boid(width / 2, height / 2));
     }
 }
 
@@ -98,10 +102,12 @@ function Boid(x, y, immortal = false) {
     this.acceleration = createVector(0, 0);
     this.velocity = createVector(random(-1, 1), random(-1, 1));
     this.position = createVector(x, y);
-    this.r = 30;             // Size
-    this.maxspeed = 1;    // Maximum speed
-    this.maxforce = 0.01; // Maximum steering force
+    this.r = 15;             // Size Radius
+    this.size = 100;             // Size Image
+    this.maxspeed = 3;    // Maximum speed
+    this.maxforce = 0.05; // Maximum steering force
     this.ttl = 60; // duree de vie en secondes
+    this.imgId = Math.floor((Math.random() * 10) % img.length);
     if (!immortal) {
         this.deathDate = ((ttl) => {
             var t = new Date();
@@ -170,10 +176,12 @@ Boid.prototype.render = function () {
     push();
     translate(this.position.x, this.position.y);
     rotate(theta);
-    /* beginShape();
-     ellipse(this.r, this.r, this.r, this.r);
-     endShape(CLOSE);*/
-    image(img, this.r, this.r, this.r, this.r);
+    beginShape();
+    vertex(0, -this.r * 2);
+    vertex(-this.r, this.r * 2);
+    vertex(this.r, this.r * 2);
+    endShape(CLOSE);
+    //image(img[this.imgId],this.size ,this.size,this.size ,this.size);
     pop();
 };
 
@@ -188,7 +196,7 @@ Boid.prototype.borders = function () {
 // Separation
 // Method checks for nearby boids and steers away
 Boid.prototype.separate = function (boids) {
-    let desiredseparation = 25.0;
+    let desiredseparation = 25; //25
     let steer = createVector(0, 0);
     let count = 0;
     // For every boid in the system, check if it's too close
