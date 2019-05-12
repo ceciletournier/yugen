@@ -1,6 +1,6 @@
-let flock;
-
-let mic;
+let flock; // Objet qui contient les papillons/boid
+let mic;  // Objet qui permet d'enregistrer le son du navigateur
+let img = []; // Liste d'images qui vont apparaitre à l'écran
 
 let initialBoid = 50; // nombre de papillon au chargement de la page
 let immortalBoid = 15; // Nombre de papillon qui ne peuvent pas mourrir
@@ -8,22 +8,26 @@ let maximumBoid = 250; // nombre de papillon qui peuvent etre affiche sur la pag
 
 let micSensitivityTrigger = 0.01; // sensibilite du micro (plus c'est bas plus c'est sensible)
 
-let boidsCanDie = true;
+let boidsCanDie = true; // Active/désactive la mort automatique des papillons passé un certain délai
 
-let clickGenerateBoids = true;
+let clickGenerateBoids = true; // Permet d'activer/désactiver la génération de boid au click de souris
 
-let randomCoordinates = true;
+let randomCoordinates = true; // Permet d'activer/désactiver la génération des boids sur des coordonnées aléatoires
+                              // si false, ils sont générés au centre de l'écran
 
-let img = [];
 
+
+// Function utilitaires de générations de coordonées aléatoires
 function randomX() {
-    return Math.floor(Math.random() * window.outerWidth) % window.outerWidth;
+    return Math.floor(Math.random() * window.outerWidth);
 }
 
 function randomY() {
-    return Math.floor(Math.random() * window.outerHeight) % window.outerHeight;
+    return Math.floor(Math.random() * window.outerHeight);
 }
 
+
+// Chargement des images
 function preload() {
     img.push(loadImage('assets/Forme-1.png'));
     img.push(loadImage('assets/Forme-2.png'));
@@ -32,11 +36,12 @@ function preload() {
     img.push(loadImage('assets/Forme-5.png'));
 }
 
+//Preparation de l'écran
 function setup() {
-    createCanvas(window.outerWidth, window.outerHeight);
+    createCanvas(window.outerWidth, window.outerHeight, 'WEBGL');
 
     flock = new Flock();
-    // Add an initial set of boids into the system
+    // Création de boids au chargement
     for (let i = 0; i < initialBoid; i++) {
         if (randomCoordinates) {
             flock.addBoid(new Boid(randomX(), randomY()));
@@ -44,20 +49,24 @@ function setup() {
             flock.addBoid(new Boid(width / 2, height / 2));
         }
     }
+    // Création des boids immortels
     for (let i = 0; i < immortalBoid; i++) {
         let b = new Boid(width / 2, height / 2, true);
         flock.addBoid(b);
     }
 
-
+    // Ajout de l'enregistrement du son
     mic = new p5.AudioIn();
     mic.start();
 
 }
 
+// Function de mise à jour du dessin
 function draw() {
-    background(0);
-    flock.run();
+    background(0); // Fond en noir
+    flock.run(); // Deplacement des papillons
+
+    // Verification du niveau sonore pour génération de papillons
     if (mic.getLevel() > micSensitivityTrigger) {
         if (randomCoordinates) {
             flock.addBoid(new Boid(randomX(), randomY()));
@@ -67,26 +76,24 @@ function draw() {
     }
 }
 
-// Add a new boid into the System
+// Genere des papillons au clic glissé
 function mouseDragged() {
     if (clickGenerateBoids) {
         flock.addBoid(new Boid(mouseX, mouseY));
     }
 }
 
-// Flock object
-// Does very little, simply manages the array of all the boids
-
+// Classe de gestion des boids
 function Flock() {
-    // An array for all the boids
-    this.boids = []; // Initialize the array
+    this.boids = [];
 }
 
+// Function de déplacement des papillons
 Flock.prototype.run = function () {
     for (let i = 0; i < this.boids.length; i++) {
-        this.boids[i].run(this.boids);  // Passing the entire list of boids to each boid individually
+        this.boids[i].run(this.boids);
     }
-    if (boidsCanDie) {
+    if (boidsCanDie) { // On verifie s'il ne faut pas faire disparaitre des papillons
         let now = new Date();
         this.boids = this.boids.filter(boid => !boid.deathDate || boid.deathDate > now);
     }
@@ -98,22 +105,17 @@ Flock.prototype.addBoid = function (b) {
     }
 };
 
-// The Nature of Code
-// Daniel Shiffman
-// http://natureofcode.com
 
-// Boid class
-// Methods for Separation, Cohesion, Alignment added
-
+// Classe boid
 function Boid(x, y, immortal = false) {
     this.acceleration = createVector(0, 0);
     this.velocity = createVector(random(-1, 1), random(-1, 1));
     this.position = createVector(x, y);
-    this.r = 100;             // Size Radius
-    this.size = 100;             // Size Image
-    this.maxspeed = 10;    // Maximum speed
-    this.maxforce = 0.001; // Maximum steering force
-    this.ttl = 60; // duree de vie en secondes
+    this.r = 100;             // radius du papillon
+    this.size = 100;             // taille de l'image
+    this.maxspeed = 10;    // Vitesse maximum
+    this.maxforce = 0.001; // Force pour la direction des papillons
+    this.ttl = 60; // Duree de vie en secondes
     this.imgId = Math.floor((Math.random() * 10) % img.length);
     if (!immortal) {
         this.deathDate = ((ttl) => {
@@ -124,6 +126,7 @@ function Boid(x, y, immortal = false) {
     }
 }
 
+// Fonction de deplacement des boids
 Boid.prototype.run = function (boids) {
     this.flock(boids);
     this.update();
@@ -132,67 +135,47 @@ Boid.prototype.run = function (boids) {
 };
 
 Boid.prototype.applyForce = function (force) {
-    // We could add mass here if we want A = F / M
     this.acceleration.add(force);
 };
 
-// We accumulate a new acceleration each time based on three rules
+// Calcul des vecteurs de separation, alignement et cohésion pour calculer le vecteur d'acceleration
+// L'alignement et la cohésion a été désactivé car on ne veut pas que les papillons se regroupent
 Boid.prototype.flock = function (boids) {
-    let sep = this.separate(boids);   // Separation
-    //let ali = this.align(boids);      // Alignment
-    //let coh = this.cohesion(boids);   // Cohesion
-    // Arbitrarily weight these forces
+    let sep = this.separate(boids);   // Séparation
+    //let ali = this.align(boids);      // Alignement désactivé
+    //let coh = this.cohesion(boids);   // Cohésion désactivée
+    // On donne un poids arbitraire à ces forces
     sep.mult(1.5);
     //ali.mult(1.0);
     //coh.mult(1.0);
-    // Add the force vectors to acceleration
+    // On ajout ces forces au vecteur d'acceleration
     this.applyForce(sep);
     //this.applyForce(ali);
     //this.applyForce(coh);
 };
 
-// Method to update location
+// Methode de mise à jour de la position
 Boid.prototype.update = function () {
-    // Update velocity
+    // Mise à jour de la velocité/vitesse
     this.velocity.add(this.acceleration);
-    // Limit speed
+    // Application de la limite de vitesse
     this.velocity.limit(this.maxspeed);
     this.position.add(this.velocity);
-    // Reset accelertion to 0 each cycle
+    // Remise à 0 de l'accéleration à chaque cycle
     this.acceleration.mult(0);
 };
 
-// A method that calculates and applies a steering force towards a target
-// STEER = DESIRED MINUS VELOCITY
-Boid.prototype.seek = function (target) {
-    let desired = p5.Vector.sub(target, this.position);  // A vector pointing from the location to the target
-    // Normalize desired and scale to maximum speed
-    desired.normalize();
-    desired.mult(this.maxspeed);
-    // Steering = Desired minus Velocity
-    let steer = p5.Vector.sub(desired, this.velocity);
-    steer.limit(this.maxforce);  // Limit to maximum steering force
-    return steer;
-};
-
+// Fonction de rendu graphique des boids
 Boid.prototype.render = function () {
-    // Draw a triangle rotated in the direction of velocity
     let theta = this.velocity.heading() + radians(90);
-    fill(255);
-    stroke(255);
     push();
     translate(this.position.x, this.position.y);
     rotate(theta);
-    /*beginShape();
-    vertex(0, -this.r * 2);
-    vertex(-this.r, this.r * 2);
-    vertex(this.r, this.r * 2);
-    endShape(CLOSE);*/
     image(img[this.imgId], this.size, this.size, this.size, this.size);
     pop();
 };
 
-// Wraparound
+// Calcul de position si on sort de l'écran
 Boid.prototype.borders = function () {
     if (this.position.x < -this.r) this.position.x = width + this.r;
     if (this.position.y < -this.r) this.position.y = height + this.r;
@@ -201,25 +184,23 @@ Boid.prototype.borders = function () {
 };
 
 // Separation
-// Method checks for nearby boids and steers away
+// Methode qui vérifie les boids adjacents afin de les éviter
 Boid.prototype.separate = function (boids) {
-    let desiredseparation = 25; //25
+    let desiredseparation = 25;
     let steer = createVector(0, 0);
     let count = 0;
-    // For every boid in the system, check if it's too close
     for (let i = 0; i < boids.length; i++) {
         let d = p5.Vector.dist(this.position, boids[i].position);
-        // If the distance is greater than 0 and less than an arbitrary amount (0 when you are yourself)
         if ((d > 0) && (d < desiredseparation)) {
-            // Calculate vector pointing away from neighbor
+            // Calcul du vecteur d'éloignement si un boid adjacent est trop près
             let diff = p5.Vector.sub(this.position, boids[i].position);
             diff.normalize();
-            diff.div(d);        // Weight by distance
+            diff.div(d);
             steer.add(diff);
-            count++;            // Keep track of how many
+            count++;            // On compte le nombre de boid à éviter
         }
     }
-    // Average -- divide by how many
+
     if (count > 0) {
         steer.div(count);
     }
@@ -235,8 +216,12 @@ Boid.prototype.separate = function (boids) {
     return steer;
 };
 
-// Alignment
-// For every nearby boid in the system, calculate the average velocity
+
+
+/* Fonctionnalités desactivées */
+
+// Alignement (Désactivé, puisque les papillons ne se déplacent plus en groupe)
+// Pour chaque boid adjacent dans le système, calcule la vitesse moyenne
 Boid.prototype.align = function (boids) {
     let neighbordist = 50;
     let sum = createVector(0, 0);
@@ -260,8 +245,8 @@ Boid.prototype.align = function (boids) {
     }
 };
 
-// Cohesion
-// For the average location (i.e. center) of all nearby boids, calculate steering vector towards that location
+// Cohesion (Désactivé, puisqu'on ne veut pas que les papillons se déplacent en groupe)
+// Calcule le vecteur de direction d'un boid pour pouvoir le regrouper avec d'autres boids
 Boid.prototype.cohesion = function (boids) {
     let neighbordist = 50;
     let sum = createVector(0, 0);   // Start with empty vector to accumulate all locations
@@ -281,4 +266,15 @@ Boid.prototype.cohesion = function (boids) {
     }
 };
 
-
+// Methode qui permet de calculer un vecteur afin qu'un boid puisse en rejoindre un autre et former un groupe
+// STEER = DESIRED MINUS VELOCITY
+Boid.prototype.seek = function (target) {
+    let desired = p5.Vector.sub(target, this.position);  // A vector pointing from the location to the target
+    // Normalize desired and scale to maximum speed
+    desired.normalize();
+    desired.mult(this.maxspeed);
+    // Steering = Desired minus Velocity
+    let steer = p5.Vector.sub(desired, this.velocity);
+    steer.limit(this.maxforce);  // Limit to maximum steering force
+    return steer;
+};
