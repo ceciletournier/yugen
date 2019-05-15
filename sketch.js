@@ -3,7 +3,7 @@ let mic;  // Objet qui permet d'enregistrer le son du navigateur
 let img = []; // Liste d'images qui vont apparaitre à l'écran
 
 let initialBoid = 50; // nombre de papillon au chargement de la page
-let immortalBoid = 15; // Nombre de papillon qui ne peuvent pas mourrir
+let immortalBoid = 10; // Nombre de papillon qui ne peuvent pas mourrir
 let maximumBoid = 270; // nombre de papillon qui peuvent etre affiche sur la page
 
 let micSensitivityTrigger = 0.01; // sensibilite du micro (plus c'est bas plus c'est sensible)
