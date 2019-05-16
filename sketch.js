@@ -6,7 +6,7 @@ let initialBoid = 50; // nombre de papillon au chargement de la page
 let immortalBoid = 15; // Nombre de papillon qui ne peuvent pas mourrir
 let maximumBoid = 270; // nombre de papillon qui peuvent etre affiche sur la page
 
-let micSensitivityTrigger = 0.5; // sensibilite du micro (plus c'est bas plus c'est sensible)
+let micSensitivityTrigger = 0.3; // sensibilite du micro (plus c'est bas plus c'est sensible)
 
 let boidsCanDie = true; // Active/désactive la mort automatique des papillons passé un certain délai
 
