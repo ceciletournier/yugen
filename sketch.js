@@ -58,7 +58,6 @@ function setup() {
 
     // Ajout de l'enregistrement du son
     mic = new p5.AudioIn();
-    mic.start();
 
 }
 
@@ -78,6 +77,11 @@ function draw() {
     } else if(enableDebug) {
         console.log(mic.getLevel());
     }
+}
+function mousePressed() {
+
+    mic.start();
+  console.log(mic);
 }
 
 // Genere des papillons au clic glissé
