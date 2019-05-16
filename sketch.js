@@ -58,6 +58,7 @@ function setup() {
 
     // Ajout de l'enregistrement du son
     mic = new p5.AudioIn();
+  mic.start();
 
 }
 
@@ -79,10 +80,8 @@ function draw() {
     }
 }
 function mousePressed() {
-
-    mic.start();
-  console.log(mic);
   document.getElementsByTagName('html')[0].mozRequestFullScreen();
+  resizeCanvas(window.outerWidth, window.outerHeight);
 }
 
 // Genere des papillons au clic glissé
