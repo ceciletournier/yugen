@@ -40,14 +40,11 @@ function preload() {
 
 //Preparation de l'écran
 function setup() {
-    mic = new p5.AudioIn();
+    createCanvas(window.outerWidth, window.outerHeight);
     if (isFireFox) {
-        createCanvas(window.outerWidth, window.outerHeight);
+        mic = new p5.AudioIn();
         mic.start();
-    } else {
-        createCanvas(window.outerWidth, window.outerHeight, 'WEBGL');
     }
-
 
     flock = new Flock();
     // Création de boids au chargement
@@ -73,15 +70,15 @@ function draw() {
     flock.run(); // Deplacement des papillons
 
     // Verification du niveau sonore pour génération de papillons
-    if (mic.getLevel() > micSensitivityTrigger) {
-        enableDebug && console.warn(mic.getLevel());
+    if (mic && mic.getLevel() > micSensitivityTrigger) {
+        enableDebug && console.warn(mic && mic.getLevel());
         if (randomCoordinates) {
             flock.addBoid(new Boid(randomX(), randomY()));
         } else {
             flock.addBoid(new Boid(width / 2, height / 2));
         }
     } else if (enableDebug) {
-        console.log(mic.getLevel());
+        console.log(mic && mic.getLevel());
     }
 }
 
@@ -90,6 +87,7 @@ function mousePressed() {
         document.getElementsByTagName('html')[0].mozRequestFullScreen && document.getElementsByTagName('html')[0].mozRequestFullScreen();
         setTimeout(() => resizeCanvas(window.outerWidth, window.outerHeight), 100);
     } else {
+        mic = new p5.AudioIn();
         mic.start();
     }
 }
