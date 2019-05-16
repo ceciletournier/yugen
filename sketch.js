@@ -127,7 +127,7 @@ function Boid(x, y, immortal = false) {
     this.size = 120;             // taille de l'image
     this.maxspeed = 10;    // Vitesse maximum
     this.maxforce = 0.001; // Force pour la direction des papillons
-    this.ttl = 30; // Duree de vie en secondes
+    this.ttl = 15; // Duree de vie en secondes
     this.imgId = Math.floor((Math.random() * 10) % img.length);
     if (!immortal) {
         this.deathDate = ((ttl) => {
