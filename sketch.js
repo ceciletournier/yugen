@@ -17,6 +17,7 @@ let randomCoordinates = true; // Permet d'activer/désactiver la génération de
 
 let enableDebug = false;
 
+let isFireFox = !!document.getElementsByTagName('html')[0].mozRequestFullScreen;
 
 // Function utilitaires de générations de coordonées aléatoires
 function randomX() {
@@ -39,7 +40,14 @@ function preload() {
 
 //Preparation de l'écran
 function setup() {
-    createCanvas(window.outerWidth, window.outerHeight, 'WEBGL');
+    mic = new p5.AudioIn();
+    if (isFireFox) {
+        createCanvas(window.outerWidth, window.outerHeight);
+        mic.start();
+    } else {
+        createCanvas(window.outerWidth, window.outerHeight, 'WEBGL');
+    }
+
 
     flock = new Flock();
     // Création de boids au chargement
@@ -56,9 +64,6 @@ function setup() {
         flock.addBoid(b);
     }
 
-    // Ajout de l'enregistrement du son
-    mic = new p5.AudioIn();
-  mic.start();
 
 }
 
@@ -75,13 +80,18 @@ function draw() {
         } else {
             flock.addBoid(new Boid(width / 2, height / 2));
         }
-    } else if(enableDebug) {
+    } else if (enableDebug) {
         console.log(mic.getLevel());
     }
 }
+
 function mousePressed() {
-  document.getElementsByTagName('html')[0].mozRequestFullScreen();
-  resizeCanvas(window.outerWidth, window.outerHeight);
+    if (isFireFox) {
+        document.getElementsByTagName('html')[0].mozRequestFullScreen && document.getElementsByTagName('html')[0].mozRequestFullScreen();
+        setTimeout(() => resizeCanvas(window.outerWidth, window.outerHeight), 100);
+    } else {
+        mic.start();
+    }
 }
 
 // Genere des papillons au clic glissé
@@ -223,7 +233,6 @@ Boid.prototype.separate = function (boids) {
     }
     return steer;
 };
-
 
 
 /* Fonctionnalités desactivées */
