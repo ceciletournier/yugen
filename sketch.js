@@ -6,7 +6,7 @@ let initialBoid = 50; // nombre de papillon au chargement de la page
 let immortalBoid = 15; // Nombre de papillon qui ne peuvent pas mourrir
 let maximumBoid = 270; // nombre de papillon qui peuvent etre affiche sur la page
 
-let micSensitivityTrigger = 0.1; // sensibilite du micro (plus c'est bas plus c'est sensible)
+let micSensitivityTrigger = 0.01; // sensibilite du micro (plus c'est bas plus c'est sensible)
 
 let boidsCanDie = true; // Active/désactive la mort automatique des papillons passé un certain délai
 
@@ -15,6 +15,7 @@ let clickGenerateBoids = true; // Permet d'activer/désactiver la génération d
 let randomCoordinates = true; // Permet d'activer/désactiver la génération des boids sur des coordonnées aléatoires
                               // si false, ils sont générés au centre de l'écran
 
+let enableDebug = false;
 
 
 // Function utilitaires de générations de coordonées aléatoires
@@ -68,11 +69,14 @@ function draw() {
 
     // Verification du niveau sonore pour génération de papillons
     if (mic.getLevel() > micSensitivityTrigger) {
+        enableDebug && console.warn(mic.getLevel());
         if (randomCoordinates) {
             flock.addBoid(new Boid(randomX(), randomY()));
         } else {
             flock.addBoid(new Boid(width / 2, height / 2));
         }
+    } else if(enableDebug) {
+        console.log(mic.getLevel());
     }
 }
 
