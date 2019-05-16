@@ -41,10 +41,6 @@ function preload() {
 //Preparation de l'écran
 function setup() {
     createCanvas(window.outerWidth, window.outerHeight);
-    if (isFireFox) {
-        mic = new p5.AudioIn();
-        mic.start();
-    }
 
     flock = new Flock();
     // Création de boids au chargement
@@ -61,7 +57,8 @@ function setup() {
         flock.addBoid(b);
     }
 
-
+    mic = new p5.AudioIn();
+    mic.start();
 }
 
 // Function de mise à jour du dessin
@@ -87,8 +84,7 @@ function mousePressed() {
         document.getElementsByTagName('html')[0].mozRequestFullScreen && document.getElementsByTagName('html')[0].mozRequestFullScreen();
         setTimeout(() => resizeCanvas(window.outerWidth, window.outerHeight), 100);
     } else {
-        mic = new p5.AudioIn();
-        mic.start();
+        getAudioContext().resume();
     }
 }
 
