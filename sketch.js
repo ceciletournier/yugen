@@ -82,6 +82,7 @@ function mousePressed() {
 
     mic.start();
   console.log(mic);
+  document.getElementsByTagName('html')[0].mozRequestFullScreen();
 }
 
 // Genere des papillons au clic glissé
