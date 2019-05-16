@@ -3,10 +3,10 @@ let mic;  // Objet qui permet d'enregistrer le son du navigateur
 let img = []; // Liste d'images qui vont apparaitre à l'écran
 
 let initialBoid = 50; // nombre de papillon au chargement de la page
-let immortalBoid = 15; // Nombre de papillon qui ne peuvent pas mourrir
+let immortalBoid = 20; // Nombre de papillon qui ne peuvent pas mourrir
 let maximumBoid = 270; // nombre de papillon qui peuvent etre affiche sur la page
 
-let micSensitivityTrigger = 0.01; // sensibilite du micro (plus c'est bas plus c'est sensible)
+let micSensitivityTrigger = 0.5; // sensibilite du micro (plus c'est bas plus c'est sensible)
 
 let boidsCanDie = true; // Active/désactive la mort automatique des papillons passé un certain délai
 
@@ -127,7 +127,7 @@ function Boid(x, y, immortal = false) {
     this.size = 120;             // taille de l'image
     this.maxspeed = 10;    // Vitesse maximum
     this.maxforce = 0.001; // Force pour la direction des papillons
-    this.ttl = 15; // Duree de vie en secondes
+    this.ttl = 30; // Duree de vie en secondes
     this.imgId = Math.floor((Math.random() * 10) % img.length);
     if (!immortal) {
         this.deathDate = ((ttl) => {
