@@ -36,6 +36,8 @@ function preload() {
     img.push(loadImage('assets/Forme-3.png'));
     img.push(loadImage('assets/Forme-4.png'));
     img.push(loadImage('assets/Forme-5.png'));
+    soundFormats('mp3', 'ogg');
+    mySound = loadSound('assets/the-legend-of-zelda-breath-of-the-wild-ost-water-side(1).mp3');
 }
 
 //Preparation de l'écran
@@ -59,6 +61,10 @@ function setup() {
 
     mic = new p5.AudioIn();
     mic.start();
+  
+    mySound.setVolume(3);
+    mySound.play();
+  
 }
 
 // Function de mise à jour du dessin
